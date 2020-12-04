@@ -6,7 +6,7 @@ var expect = chai.expect;
 
 chai.use(chaiHttp);
 
-async function sendAddCartLineRequest(app, product) {
+async function addCartLineRequest(app, product) {
     await chai.request(app)
         .post("/carts/cartLine")
         .auth('admin', 'admin')
@@ -15,6 +15,16 @@ async function sendAddCartLineRequest(app, product) {
             productTitle: product.title,
             quantity: getRandomInt(10),
             sellerId: product.sellerId
+        })
+}
+
+async function removeCartLineRequest(app) {
+    await chai.request(app)
+        .delete("/carts/cartLine")
+        .auth('admin', 'admin')
+        .send({
+            userId: "admin",
+            No : "1"
         })
 }
 
@@ -37,8 +47,10 @@ describe('get all products by category', async () => {
             const response = await sendProductRequest(app, category.name)
 
             for(let product of response.body) {
-                await sendAddCartLineRequest(app, product);
+                await addCartLineRequest(app, product);
             }
+
+            await removeCartLineRequest(app)
 
             const confirmResponse = await chai.request(app)
                 .post("/carts/confirm")
